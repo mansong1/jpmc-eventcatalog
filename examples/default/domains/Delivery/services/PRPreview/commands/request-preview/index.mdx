@@ -3,12 +3,12 @@ id: request-preview
 name: Request Preview
 version: 1.0.0
 summary: |
-  Sent from the CLI (bin/ec preview <n> | harness execute pipeline:dynamic ec_dynamic) to build and deploy a preview without a trigger.
+  Starts the saved pr_preview pipeline for PR <n>: by the PR trigger, or by hand from the harness CLI or MCP server with input pr=<n>.
 owners:
   - delivery-platform
 schemaPath: schema.json
 badges:
-  - content: 'Harness dynamic pipeline'
+  - content: 'Harness pipeline'
     backgroundColor: blue
     textColor: blue
     icon: BoltIcon
@@ -18,7 +18,7 @@ import Footer from '@catalog/components/footer.astro';
 
 ## Overview
 
-Sent by [[service|delivery-cli]]. `--laptop` moves the functional build onto the developer's Mac delegate. `--save` stores the generated YAML as a retryable pipeline tagged `expires_at`.
+Sent by the GitHub PR trigger `pr_preview_github`, or by [[service|delivery-cli]] for a re-run. It's a saved pipeline, so a failed stage can be retried (`harness execute execution:retry pr_preview/<exec> --retry-stages deploy`).
 
 <SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
 

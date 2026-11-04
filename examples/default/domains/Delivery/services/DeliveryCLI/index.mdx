@@ -1,9 +1,9 @@
 ---
 id: delivery-cli
 version: 1.0.0
-name: ec CLI + harness CLI
+name: harness CLI + MCP server
 summary: |
-  Developer entry point: bin/ec renders pipeline YAML, the harness CLI executes it headless and approves, retries and starts saved pipelines.
+  Developer entry point: the harness CLI (or an assistant through the Harness MCP server) starts saved pipelines with inputs and input sets, approves, retries and runs one-off dynamic YAML.
 owners:
   - delivery-platform
 sends:
@@ -21,9 +21,9 @@ import Footer from '@catalog/components/footer.astro';
 
 ## Overview
 
-Everything is driven from the command line. `bin/ec` is a Python renderer that prints generated pipeline YAML to stdout and makes no API calls. The `harness` CLI runs that YAML as a dynamic execution of the saved shell pipeline `ec_dynamic` (`bin/ec preview 42 | harness execute pipeline:dynamic ec_dynamic -f -`), and the executed YAML is stored on the run.
+Nobody hand-writes a pipeline. The everyday path is a saved pipeline plus inputs: `harness execute pipeline deploy_ecs --input env=jpmc_prod --input image_tag=<tag>`, or `--input-set main --input who=<you>` for the laptop pipelines. From an assistant, the Harness MCP server does the same with `harness_execute(resource_type=pipeline, action=run, resource_id=<id>, inputs={...})`, which resolves the runtime inputs for you.
 
-The same CLI starts saved pipelines (`release_candidate`, `deploy_ecs*`), approves or rejects approval steps, and retries stages. Dynamic runs take no input sets or runtime inputs, so `ec` bakes the values into the YAML, where they can be reviewed. On-run OPA policies evaluate that YAML like any saved pipeline.
+The same CLI approves or rejects approval steps and retries stages. One-off YAML runs as a dynamic execution of the shell pipeline `ec_dynamic` (`harness execute pipeline:dynamic ec_dynamic -f pipelines/dynamic/smoke_envs.yaml`; CLI only, no MCP equivalent), and the executed YAML is stored on the run. Dynamic runs take no input sets or runtime inputs, so the values live in the reviewed file. On-run OPA policies evaluate that YAML like any saved pipeline.
 
 ## Architecture diagram
 

@@ -3,7 +3,7 @@ id: deploy-image
 name: Deploy Image
 version: 1.0.0
 summary: |
-  Deploys a given image tag to one environment with that environment's strategy (deploy_ecs, deploy_ecs_bluegreen, deploy_ecs_canary).
+  Deploys a given image tag to one environment with that environment's strategy (one pipeline, deploy_ecs; the env input picks rolling, blue/green or canary).
 owners:
   - delivery-platform
 schemaPath: schema.json
@@ -18,7 +18,7 @@ import Footer from '@catalog/components/footer.astro';
 
 ## Overview
 
-Sent by [[service|delivery-cli]] (`harness execute pipeline deploy_ecs_canary --input env=jpmc_prod --input image_tag=<tag>`) or by [[service|release-orchestration]] activities.
+Sent by [[service|delivery-cli]] (`harness execute pipeline deploy_ecs --input env=jpmc_prod --input image_tag=<tag>`) or by [[service|release-orchestration]] activities.
 
 <SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
 

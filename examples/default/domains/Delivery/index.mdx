@@ -37,7 +37,7 @@ The **Delivery Platform** domain models the system that builds, previews, gates 
 
 | Component | Responsibility |
 |-----------|----------------|
-| [[service\|delivery-cli]] | `bin/ec` renders pipeline YAML, and the `harness` CLI runs it headless |
+| [[service\|delivery-cli]] | the `harness` CLI and MCP server start saved pipelines with inputs; one-off YAML runs dynamically |
 | [[service\|pr-preview]] | Functional build (Cloud or Mac), IaCM slot, ECS preview, 24h review |
 | [[service\|rc-build]] | STO gates, then one immutable `rc-<sha>` image |
 | [[service\|promotion-gate]] | Approval or change window → fresh evidence → OPA policy |
