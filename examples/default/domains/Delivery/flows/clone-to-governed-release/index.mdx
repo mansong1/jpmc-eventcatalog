@@ -1,0 +1,230 @@
+---
+id: clone-to-governed-release
+name: Clone to governed release
+version: 1.0.0
+summary: |
+  One change from pull request to production: PR preview and review, merge, release-candidate gates, dev → staging blue/green → prod canary through two promotion gates, with the failure branch to the autofix agents.
+owners:
+  - delivery-platform
+steps:
+  - id: developer
+    title: Developer opens a PR
+    actor:
+      name: Developer
+      summary: Clones the repo, pushes a branch and opens a PR against main (or runs ec preview from the CLI).
+    next_step:
+      id: pull_request_opened
+      label: Open PR
+
+  - id: pull_request_opened
+    title: Pull Request Opened
+    message:
+      id: pull-request-opened
+      version: 1.0.0
+    next_step:
+      id: pr_preview
+      label: pr_preview_github trigger
+
+  - id: pr_preview
+    title: PR Preview
+    service:
+      id: pr-preview
+      version: 1.0.0
+    next_step:
+      id: preview_deployed
+      label: Build, slot, deploy
+
+  - id: preview_deployed
+    title: Preview Deployed
+    message:
+      id: preview-deployed
+      version: 1.0.0
+    next_steps:
+      - id: preview_accepted
+        label: Accept (within 24h)
+      - id: preview_rejected
+        label: Reject or timeout
+
+  - id: preview_rejected
+    title: Preview Rejected
+    message:
+      id: preview-rejected
+      version: 1.0.0
+    next_step:
+      id: torn_down
+      label: Teardown
+
+  - id: torn_down
+    title: Preview torn down
+    custom:
+      title: Preview torn down
+      color: red
+      icon: TrashIcon
+      type: Outcome
+      summary: The ECS service and then the IaCM slot are destroyed; the hourly janitor catches anything left behind.
+
+  - id: preview_accepted
+    title: Preview Accepted
+    message:
+      id: preview-accepted
+      version: 1.0.0
+    next_step:
+      id: merged_to_main
+      label: Merge PR
+
+  - id: merged_to_main
+    title: Merged To Main
+    message:
+      id: merged-to-main
+      version: 1.0.0
+    next_step:
+      id: rc_build
+      label: rc_on_merge trigger
+
+  - id: rc_build
+    title: RC Build (STO gates)
+    service:
+      id: rc-build
+      version: 1.0.0
+    next_steps:
+      - id: release_candidate_built
+        label: All gates pass
+      - id: gate_failed
+        label: Gate fails
+
+  - id: release_candidate_built
+    title: Release Candidate Built (rc-<sha>)
+    message:
+      id: release-candidate-built
+      version: 1.0.0
+    next_step:
+      id: deploy_dev
+      label: Deploy to dev
+
+  - id: deploy_dev
+    title: ECS Runtime — dev (rolling)
+    service:
+      id: ecs-runtime
+      version: 1.0.0
+    next_step:
+      id: gate_staging
+      label: Deployed to dev
+
+  - id: gate_staging
+    title: Promotion Gate — staging
+    service:
+      id: promotion-gate
+      version: 1.0.0
+    next_steps:
+      - id: deploy_staging
+        label: Promotion approved
+      - id: promotion_denied
+        label: Promotion denied
+
+  - id: deploy_staging
+    title: ECS Runtime — staging (blue/green :8197 → :8199)
+    service:
+      id: ecs-runtime
+      version: 1.0.0
+    next_step:
+      id: gate_prod
+      label: Deployed to staging
+
+  - id: gate_prod
+    title: Promotion Gate — prod (180s soak)
+    service:
+      id: promotion-gate
+      version: 1.0.0
+    next_steps:
+      - id: deploy_prod
+        label: Promotion approved
+      - id: promotion_denied
+        label: Promotion denied
+
+  - id: deploy_prod
+    title: ECS Runtime — prod (canary, :80)
+    service:
+      id: ecs-runtime
+      version: 1.0.0
+    next_step:
+      id: deployed_prod
+      label: Verify
+
+  - id: deployed_prod
+    title: Deployed To Environment (prod)
+    message:
+      id: deployed-to-environment
+      version: 1.0.0
+    next_step:
+      id: released
+      label: Live
+
+  - id: released
+    title: Released
+    custom:
+      title: Released to prod
+      color: green
+      icon: RocketLaunchIcon
+      type: Outcome
+      summary: The same rc-<sha> image built and scanned once is serving production on :80.
+
+  - id: promotion_denied
+    title: Promotion Denied
+    message:
+      id: promotion-denied
+      version: 1.0.0
+    next_step:
+      id: rc_autofix
+      label: Stage fails
+
+  - id: gate_failed
+    title: Gate Failed
+    message:
+      id: gate-failed
+      version: 1.0.0
+    next_step:
+      id: rc_autofix
+      label: Chain rc_autofix
+
+  - id: rc_autofix
+    title: RC Autofix Agents
+    service:
+      id: rc-autofix-agents
+      version: 1.0.0
+    next_steps:
+      - id: autofix_pr
+        label: fix
+      - id: human
+        label: retry / human
+
+  - id: autofix_pr
+    title: Autofix Pull Request Raised
+    message:
+      id: autofix-pull-request-raised
+      version: 1.0.0
+    next_step:
+      id: developer
+      label: Review the PR
+
+  - id: human
+    title: Human follow-up
+    custom:
+      title: Retry or human
+      color: orange
+      icon: UserIcon
+      type: Outcome
+      summary: Triage prints the retry command, or hands the report to a human (secrets findings, policy denials and anything unclear always go here).
+---
+
+## Overview
+
+**Clone to governed release** is the whole delivery path for this catalog. A change is reviewed as a running preview before merge. It is then built and scanned **once** as `rc-<sha>`, and that tag is promoted through dev, staging and prod. Each promotion is judged by policy on what the previous environment is serving *now*.
+
+<NodeGraph />
+
+## How it works
+
+1. A PR triggers [[service|pr-preview]], which publishes [[event|preview-deployed]] and waits up to 24h for [[event|preview-accepted]] or [[event|preview-rejected]].
+2. [[event|merged-to-main]] starts [[service|rc-build]]. If the gates pass, it publishes [[event|release-candidate-built]].
+3. [[service|ecs-runtime]] deploys to dev (rolling). Then [[service|promotion-gate]] promotes to staging (blue/green) and, after a 180 s soak, to prod (canary).
+4. Any failure ([[event|gate-failed]] or [[event|promotion-denied]]) chains [[service|rc-autofix-agents]], which either raises [[event|autofix-pull-request-raised]] or hands off to a human.

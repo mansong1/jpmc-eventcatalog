@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PreviewDeployed",
+  "type": "object",
+  "properties": {
+    "prNumber": {
+      "type": "integer"
+    },
+    "url": {
+      "type": "string"
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 8100,
+      "maximum": 8196
+    },
+    "imageTag": {
+      "type": "string"
+    },
+    "workspace": {
+      "type": "string",
+      "description": "IaCM workspace, jpmc_pv_pr_<n>"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "prNumber",
+    "url",
+    "port",
+    "imageTag",
+    "workspace",
+    "expiresAt"
+  ]
+}

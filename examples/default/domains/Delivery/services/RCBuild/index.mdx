@@ -1,0 +1,42 @@
+---
+id: rc-build
+version: 1.0.0
+name: RC Build
+summary: |
+  Runs the STO security gates and pushes one immutable rc-<sha> image only after every gate passes.
+owners:
+  - delivery-platform
+receives:
+  - id: merged-to-main
+    version: 1.0.0
+  - id: start-release-candidate
+    version: 1.0.0
+sends:
+  - id: release-candidate-built
+    version: 1.0.0
+  - id: gate-failed
+    version: 1.0.0
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+The first stage of `release_candidate` (also generated as the standalone `rc_build` pipeline for Release Orchestration).
+
+| Gate | Scanner | Fails on |
+|---|---|---|
+| secrets | Gitleaks (repository) | medium (reviewed allowlist in `.gitleaks.toml`) |
+| SAST | Semgrep (repository) | critical |
+| SCA | OsvScanner (repository) | report-only |
+| image | AquaTrivy on the locally built image, before push | critical |
+
+Only after all gates pass is the image pushed as `rc-<sha>`. Every later deployment reads that one tag, and nothing is rebuilt.
+
+## Architecture diagram
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} />
+
+<Footer />

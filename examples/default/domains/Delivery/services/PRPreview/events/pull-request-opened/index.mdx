@@ -1,0 +1,29 @@
+---
+id: pull-request-opened
+name: Pull Request Opened
+version: 1.0.0
+summary: |
+  A GitHub pull request against main was opened or reopened; trigger pr_preview_github starts the saved pr_preview pipeline.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Source:GitHub webhook'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Delivered by GitHub to Harness trigger `pr_preview_github`, which starts [[service|pr-preview]]. Per-PR resources are keyed on the PR number.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

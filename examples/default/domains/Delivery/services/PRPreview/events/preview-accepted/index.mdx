@@ -1,0 +1,29 @@
+---
+id: preview-accepted
+name: Preview Accepted
+version: 1.0.0
+summary: |
+  A reviewer approved the preview within 24h; it is kept until expires_at.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness approval'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+The outcome of the 24h approval in [[service|pr-preview]]. Once the PR is merged, [[event|merged-to-main]] starts the release.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

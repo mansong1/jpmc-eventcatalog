@@ -1,0 +1,34 @@
+---
+id: delivery-cli
+version: 1.0.0
+name: ec CLI + harness CLI
+summary: |
+  Developer entry point: bin/ec renders pipeline YAML, the harness CLI executes it headless and approves, retries and starts saved pipelines.
+owners:
+  - delivery-platform
+sends:
+  - id: request-preview
+    version: 1.0.0
+  - id: start-release-candidate
+    version: 1.0.0
+  - id: promotion-requested
+    version: 1.0.0
+  - id: deploy-image
+    version: 1.0.0
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Everything is driven from the command line. `bin/ec` is a Python renderer that prints generated pipeline YAML to stdout and makes no API calls. The `harness` CLI runs that YAML as a dynamic execution of the saved shell pipeline `ec_dynamic` (`bin/ec preview 42 | harness execute pipeline:dynamic ec_dynamic -f -`), and the executed YAML is stored on the run.
+
+The same CLI starts saved pipelines (`release_candidate`, `deploy_ecs*`), approves or rejects approval steps, and retries stages. Dynamic runs take no input sets or runtime inputs, so `ec` bakes the values into the YAML, where they can be reviewed. On-run OPA policies evaluate that YAML like any saved pipeline.
+
+## Architecture diagram
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} />
+
+<Footer />

@@ -1,0 +1,29 @@
+---
+id: promotion-requested
+name: Promotion Requested
+version: 1.0.0
+summary: |
+  An approval on the jpmc_promotion gate: a manual approve (CLI or UI) or the scheduled prod change window opening.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness approval'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Sent by [[service|delivery-cli]] (`harness execute approval_instance:approve <id>`), or raised automatically when `prod_window` is reached. [[service|promotion-gate]] then gathers fresh evidence and evaluates policy.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

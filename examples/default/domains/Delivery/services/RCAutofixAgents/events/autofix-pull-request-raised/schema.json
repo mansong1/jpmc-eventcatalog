@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AutofixPullRequestRaised",
+  "type": "object",
+  "properties": {
+    "failedExecutionId": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string",
+      "pattern": "^autofix/rc-"
+    },
+    "pullRequestUrl": {
+      "type": "string"
+    },
+    "filesChanged": {
+      "type": "integer",
+      "maximum": 3
+    },
+    "gateResult": {
+      "type": "string",
+      "description": "result of the same gate re-run, e.g. 0 critical, 0 high"
+    }
+  },
+  "required": [
+    "failedExecutionId",
+    "branch",
+    "pullRequestUrl"
+  ]
+}

@@ -1,0 +1,35 @@
+---
+id: release-orchestration
+version: 1.0.0
+name: Release Orchestration
+summary: |
+  Release Orchestration process eventcatalog_release runs the same rc-<sha> artifact through phases jpmc_rc → jpmc_staging → jpmc_prod.
+owners:
+  - delivery-platform
+receives:
+  - id: release-candidate-built
+    version: 1.0.0
+  - id: deployed-to-environment
+    version: 1.0.0
+sends:
+  - id: start-release-candidate
+    version: 1.0.0
+  - id: deploy-image
+    version: 1.0.0
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Process `eventcatalog_release` runs three phases: `jpmc_rc` → `jpmc_staging` → `jpmc_prod`. Its activities run `rc_build` and the deploy pipelines. Outputs are chained across phases, `IMAGE_TAG` → dev `DEPLOYED_TAG` → staging → manual *Approve prod release* → prod, using `<+phase.<phase>.activity.<activity>.outputs.<name>>` references.
+
+Activities and the process are created and updated over the API. Starting a release has no API and is a click in the UI.
+
+## Architecture diagram
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} />
+
+<Footer />

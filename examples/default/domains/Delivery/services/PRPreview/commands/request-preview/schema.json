@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RequestPreview",
+  "type": "object",
+  "properties": {
+    "prNumber": {
+      "type": "integer"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "buildLocation": {
+      "type": "string",
+      "enum": [
+        "cloud",
+        "laptop"
+      ]
+    },
+    "who": {
+      "type": "string",
+      "description": "Mac delegate selector suffix, jpmc-mac-<who>"
+    },
+    "save": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "prNumber",
+    "branch",
+    "buildLocation"
+  ]
+}

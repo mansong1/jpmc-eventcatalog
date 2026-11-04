@@ -1,0 +1,29 @@
+---
+id: promotion-denied
+name: Promotion Denied
+version: 1.0.0
+summary: |
+  The jpmc_promotion_gate policy denied promotion; the deny messages give the reason.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'OPA policy'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|promotion-gate]]. Triage in [[service|rc-autofix-agents]] always routes policy denials to a human.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

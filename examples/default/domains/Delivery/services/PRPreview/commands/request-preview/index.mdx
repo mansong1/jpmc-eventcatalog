@@ -1,0 +1,29 @@
+---
+id: request-preview
+name: Request Preview
+version: 1.0.0
+summary: |
+  Sent from the CLI (bin/ec preview <n> | harness execute pipeline:dynamic ec_dynamic) to build and deploy a preview without a trigger.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness dynamic pipeline'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Sent by [[service|delivery-cli]]. `--laptop` moves the functional build onto the developer's Mac delegate. `--save` stores the generated YAML as a retryable pipeline tagged `expires_at`.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

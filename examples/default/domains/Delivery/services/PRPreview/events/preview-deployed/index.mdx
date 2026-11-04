@@ -1,0 +1,29 @@
+---
+id: preview-deployed
+name: Preview Deployed
+version: 1.0.0
+summary: |
+  The PR's ECS preview service is serving on its own ALB port and the URL has been posted into the 24h approval.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness pipeline'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|pr-preview]] once the slot is provisioned and the service is healthy.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />
