@@ -13,4 +13,7 @@ paths = [
   '''(examples|packages/create-eventcatalog/templates)/default/domains/Customer/systems/.*/examples/index\.mdx''',
   # docs .env snippet with a truncated example JWT ("eyJ0...")
   '''packages/core/docs/plugins/azure-schema-registry/01-installation\.md''',
+  # placeholder card-gateway token ("tok_abc123xyz") in the PaymentMethod example entity; only in history, which a
+  # branch clone brings along
+  '''(examples|packages/create-eventcatalog/templates)/default/domains/Payment/entities/PaymentMethod/index\.mdx''',
 ]
