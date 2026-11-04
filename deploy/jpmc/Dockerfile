@@ -10,6 +10,8 @@ ENV BUILD_LABEL=${BUILD_LABEL} CI=true
 RUN ./deploy/jpmc/functional-build.sh
 
 FROM nginx:1.29-alpine
+# patched OS packages: the RC image gate (AquaTrivy, fail on critical) blocked rc-6fadf36 on alpine libs in the base
+RUN apk upgrade --no-cache
 COPY deploy/jpmc/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /repo/examples/default/dist /usr/share/nginx/html
 ARG BUILD_LABEL=""
