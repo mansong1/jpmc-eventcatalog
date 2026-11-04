@@ -1,0 +1,13 @@
+output "aws_account_id" { value = data.aws_caller_identity.current.account_id }
+output "ecr_repository_url" { value = aws_ecr_repository.app.repository_url }
+output "log_group" { value = aws_cloudwatch_log_group.app.name }
+output "alb_arn" { value = aws_lb.app.arn }
+output "alb_dns" { value = aws_lb.app.dns_name }
+output "prod_url" { value = "http://${aws_lb.app.dns_name}" }
+output "test_url" { value = "http://${aws_lb.app.dns_name}:8080" }
+output "prod_listener_arn" { value = aws_lb_listener.prod.arn }
+output "test_listener_arn" { value = aws_lb_listener.test.arn }
+output "blue_target_group_arn" { value = aws_lb_target_group.app["blue"].arn }
+output "green_target_group_arn" { value = aws_lb_target_group.app["green"].arn }
+output "tasks_security_group_id" { value = aws_security_group.tasks.id }
+output "subnet_ids" { value = var.subnet_ids }
