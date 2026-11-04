@@ -15,6 +15,40 @@ The delivery platform for this catalog is modelled in the catalog itself:
 
 This page covers only what the model doesn't show.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph laptop["Engineer's Mac"]
+    cli["harness CLI<br/>bin/ec renders the YAML"]
+    d3["Delegate 3.0<br/>jpmc-mac-&lt;who&gt;"]
+  end
+  repo["GitHub<br/>jpmc-eventcatalog"]
+  subgraph harness["Harness · JPMC_Workshop · OPA on every run and plan"]
+    dyn["ec_dynamic<br/>generated pipelines"]
+    pv["pr_preview<br/>URL · 24h accept / reject"]
+    rc["release_candidate<br/>STO gates · promotions"]
+    agents["Worker agents<br/>triage · fixer"]
+  end
+  subgraph aws["AWS us-east-1 · eks delegate (IRSA) · IaCM"]
+    ecr["ECR<br/>rc-&lt;sha&gt; · pr-&lt;n&gt;"]
+    ecs["ECS Fargate<br/>dev rolling · staging blue/green<br/>prod canary · pr previews"]
+    alb["ALB<br/>one port per environment"]
+  end
+
+  cli -->|generated YAML| dyn
+  dyn -->|functional build · triage| d3
+  repo -->|PR| pv
+  repo -->|merge to main| rc
+  rc -->|on failure| agents
+  pv -->|image| ecr
+  rc -->|rc-&lt;sha&gt;| ecr
+  ecr --> ecs
+  alb --> ecs
+  pv -.->|harness/preview status| repo
+  agents -.->|autofix PR| repo
+```
+
 ## AWS runtime topology
 
 Everything runs behind one shared Application Load Balancer, `jpmc-eventcatalog`. Each environment and each PR preview gets its own listener port and target group, so a new preview needs no DNS change. Workloads are static nginx images on ECS Fargate, pulled from ECR repository `jpmc-eventcatalog` (immutable tags, scan on push, `pr-*` images expire after 7 days).
