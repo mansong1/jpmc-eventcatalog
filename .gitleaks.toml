@@ -1,0 +1,16 @@
+# Gitleaks config for the STO "secrets" gate in release_candidate (and any other STO Gitleaks scan).
+# Extends the default rules; the allowlist below is the reviewed list of known false positives.
+# Adding a path here is a security decision - it needs a PR review, the same as code.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Reviewed false positives (JPMC workshop, 2026-11-04)"
+paths = [
+  # PostHog *public* project key: write-only ingestion key, shipped to browsers by design (see file header)
+  '''apps/studio-web/src/lib/posthog\.ts''',
+  # placeholder tokens in EventCatalog example message payloads
+  '''(examples|packages/create-eventcatalog/templates)/default/domains/Customer/systems/.*/examples/index\.mdx''',
+  # docs .env snippet with a truncated example JWT ("eyJ0...")
+  '''packages/core/docs/plugins/azure-schema-registry/01-installation\.md''',
+]
