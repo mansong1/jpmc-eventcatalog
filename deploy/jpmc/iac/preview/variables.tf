@@ -11,6 +11,11 @@ variable "port" {
   default     = 0
   description = "Override the ALB port (0 = derive from preview_id)"
 }
+variable "test_port" {
+  type        = number
+  default     = 0
+  description = "Blue/green slots only: port of the test listener and its green target group (0 = no blue/green)"
+}
 variable "ttl_hours" {
   type    = number
   default = 24
