@@ -15,7 +15,25 @@ The delivery platform for this catalog is modelled in the catalog itself:
 
 This page covers only what the model doesn't show.
 
-## Architecture
+## Delivery map
+
+The saved Harness pipelines and the messages between them, drawn from the catalog model. Pink is a pipeline
+(service), orange an event, blue a command, grey a channel. GitHub webhooks and the pipeline API (harness CLI ·
+MCP server) route into each system.
+
+### PR preview
+
+<NodeGraph id="preview-system" version="1.0.0" type="system" maxHeight={30} mode="simple" />
+
+### Release
+
+A failed gate reaches the agents as a chained stage; ECS sits outside the system on AWS.
+
+<NodeGraph id="release-system" version="1.0.0" type="system" maxHeight={40} mode="simple" />
+
+## Runtime topology
+
+Where each piece runs: the engineer's Mac, Harness, and AWS.
 
 ```mermaid
 flowchart LR
@@ -28,25 +46,44 @@ flowchart LR
     lap["laptop_build · laptop_triage<br/>jpmc-mac-&lt;who&gt;"]
     pv["pr_preview<br/>URL · 24h accept / reject"]
     rc["release_candidate<br/>STO gates · promotions"]
-    agents["Worker agents<br/>triage · fixer"]
+    agents["rc_autofix<br/>triage · fixer agents"]
   end
   subgraph aws["AWS us-east-1 · eks delegate (IRSA) · IaCM"]
     ecr["ECR<br/>rc-&lt;sha&gt; · pr-&lt;n&gt;"]
-    ecs["ECS Fargate<br/>dev rolling · staging blue/green<br/>prod canary · pr previews"]
+    ecs["ECS Fargate · deploy_ecs<br/>dev rolling · staging blue/green<br/>prod canary · pr previews"]
     alb["ALB<br/>one port per environment"]
   end
 
   cli -->|run with inputs| lap
   lap -->|functional build · triage agent| d3
-  repo -->|PR| pv
-  repo -->|merge to main| rc
-  rc -->|on failure| agents
+  repo -->|PR webhook| pv
+  repo -->|merge webhook| rc
+  rc -->|on failure · chained stage| agents
   pv -->|image| ecr
   rc -->|rc-&lt;sha&gt;| ecr
   ecr --> ecs
   alb --> ecs
   pv -.->|harness/preview status| repo
   agents -.->|autofix PR| repo
+
+  classDef pipeline fill:#2a1424,stroke:#ec4899,stroke-width:2px,color:#fbcfe8
+  classDef entry fill:#111c33,stroke:#3b82f6,stroke-width:2px,color:#bfdbfe
+  classDef agent fill:#1f1633,stroke:#a855f7,stroke-width:2px,color:#e9d5ff
+  classDef ext fill:#1f2328,stroke:#9ca3af,stroke-width:2px,color:#e5e7eb
+  classDef cloud fill:#2b1d0e,stroke:#f59e0b,stroke-width:2px,color:#fde68a
+  class pv,rc,lap pipeline
+  class cli,d3 entry
+  class agents agent
+  class repo ext
+  class ecr,ecs,alb cloud
+  style laptop fill:#0b1220,stroke:#3b82f6,stroke-dasharray:4 3,color:#93c5fd
+  style harness fill:#140f22,stroke:#a855f7,stroke-width:2px,color:#d8b4fe
+  style aws fill:#17110a,stroke:#f59e0b,stroke-dasharray:4 3,color:#fcd34d
+  linkStyle 0,1 stroke:#3b82f6,stroke-width:2px
+  linkStyle 2,3 stroke:#9ca3af,stroke-width:2px
+  linkStyle 4 stroke:#a855f7,stroke-width:2px
+  linkStyle 5,6,7,8 stroke:#f59e0b,stroke-width:2px
+  linkStyle 9,10 stroke:#ec4899,stroke-width:2px
 ```
 
 ## AWS runtime topology

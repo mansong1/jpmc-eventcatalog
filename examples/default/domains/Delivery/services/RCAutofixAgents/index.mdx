@@ -9,6 +9,9 @@ owners:
 receives:
   - id: gate-failed
     version: 1.0.0
+    from:
+      - id: delivery.chained-stage
+        version: 1.0.0
   - id: promotion-denied
     version: 1.0.0
 sends:

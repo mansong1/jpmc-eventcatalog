@@ -14,8 +14,14 @@ receives:
 sends:
   - id: start-release-candidate
     version: 1.0.0
+    to:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
   - id: deploy-image
     version: 1.0.0
+    to:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
 ---
 
 import Footer from '@catalog/components/footer.astro';

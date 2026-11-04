@@ -1,0 +1,23 @@
+---
+id: delivery.github-webhooks
+name: GitHub Webhooks
+version: 1.0.0
+summary: |
+  GitHub pull_request and push webhooks for mansong1/jpmc-eventcatalog, delivered to Harness triggers pr_preview_github and rc_on_merge.
+owners:
+  - delivery-platform
+address: /ng/api/webhook
+protocols:
+  - https
+deliveryGuarantee: at-least-once
+---
+
+## Overview
+
+GitHub delivers PR and push events here. Trigger `pr_preview_github` starts [[service|pr-preview]] on a PR open or reopen, and trigger `rc_on_merge` starts [[service|rc-build]] on a push to `main`.
+
+<ChannelInformation />
+
+## Architecture diagram
+
+<NodeGraph />

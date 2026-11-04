@@ -9,8 +9,14 @@ owners:
 receives:
   - id: pull-request-opened
     version: 1.0.0
+    from:
+      - id: delivery.github-webhooks
+        version: 1.0.0
   - id: request-preview
     version: 1.0.0
+    from:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
 sends:
   - id: preview-deployed
     version: 1.0.0

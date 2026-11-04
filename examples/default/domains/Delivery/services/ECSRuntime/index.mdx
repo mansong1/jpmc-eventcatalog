@@ -13,11 +13,17 @@ receives:
     version: 1.0.0
   - id: deploy-image
     version: 1.0.0
+    from:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
 sends:
   - id: deployed-to-environment
     version: 1.0.0
   - id: gate-failed
     version: 1.0.0
+    to:
+      - id: delivery.chained-stage
+        version: 1.0.0
 ---
 
 import Footer from '@catalog/components/footer.astro';

@@ -1,0 +1,36 @@
+---
+id: preview-system
+name: PR Preview System
+version: 1.0.0
+summary: |
+  Saved pipeline pr_preview: one IaCM slot and ECS service per PR, a harness/preview status with the URL, and a 24h accept or reject before teardown.
+owners:
+  - delivery-platform
+services:
+  - id: pr-preview
+flows:
+  - id: clone-to-governed-release
+    version: 1.0.0
+actors:
+  - id: engineer
+    name: Engineer
+    label: opens a PR, accepts or rejects
+    direction: inbound
+badges:
+  - content: Harness · JPMC_Workshop
+    backgroundColor: purple
+    textColor: purple
+    icon: BoltIcon
+---
+
+## Overview
+
+A PR opened against `main` arrives on [[channel|delivery.github-webhooks]] and starts [[service|pr-preview]]. A re-run comes from the [[service|delivery-cli]] through the [[channel|delivery.harness-pipeline-api]]. The preview is accepted or rejected within 24h, then torn down.
+
+## Resource Diagram
+
+<NodeGraph />
+
+## Context Diagram
+
+<ContextDiagram />

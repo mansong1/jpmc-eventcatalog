@@ -9,13 +9,22 @@ owners:
 receives:
   - id: merged-to-main
     version: 1.0.0
+    from:
+      - id: delivery.github-webhooks
+        version: 1.0.0
   - id: start-release-candidate
     version: 1.0.0
+    from:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
 sends:
   - id: release-candidate-built
     version: 1.0.0
   - id: gate-failed
     version: 1.0.0
+    to:
+      - id: delivery.chained-stage
+        version: 1.0.0
 ---
 
 import Footer from '@catalog/components/footer.astro';
