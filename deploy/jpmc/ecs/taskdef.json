@@ -1,0 +1,18 @@
+{
+  "family": "jpmc-eventcatalog-<+env.identifier>",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::759984737373:role/cicd-demo-ecs-task-execution",
+  "containerDefinitions": [{
+    "name": "eventcatalog",
+    "image": "<+artifact.image>",
+    "essential": true,
+    "portMappings": [{"containerPort": 80, "protocol": "tcp"}],
+    "logConfiguration": {"logDriver": "awslogs", "options": {
+      "awslogs-group": "/jpmc/jpmc-eventcatalog", "awslogs-region": "us-east-1",
+      "awslogs-stream-prefix": "<+stage.variables.ecs_service>"}},
+    "healthCheck": {"command": ["CMD-SHELL", "wget -qO- http://localhost/healthz || exit 1"], "interval": 15, "retries": 3, "startPeriod": 10}
+  }]
+}

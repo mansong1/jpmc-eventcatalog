@@ -1,0 +1,14 @@
+{
+  "serviceName": "<+stage.variables.ecs_service>",
+  "launchType": "FARGATE",
+  "desiredCount": <+stage.variables.desired_count>,
+  "deploymentConfiguration": {"maximumPercent": 200, "minimumHealthyPercent": 100,
+    "deploymentCircuitBreaker": {"enable": true, "rollback": false}},
+  "healthCheckGracePeriodSeconds": 30,
+  "loadBalancers": [{"targetGroupArn": "<+stage.variables.target_group_arn>", "containerName": "eventcatalog", "containerPort": 80}],
+  "networkConfiguration": {"awsvpcConfiguration": {
+    "subnets": ["subnet-7db33072", "subnet-35b30f7f", "subnet-e7bc4480"],
+    "securityGroups": ["<+stage.variables.task_sg>"], "assignPublicIp": "ENABLED"}},
+  "tags": [{"key": "app", "value": "jpmc-eventcatalog"}, {"key": "env", "value": "<+env.identifier>"},
+           {"key": "deployed_by", "value": "harness"}, {"key": "execution", "value": "<+pipeline.executionId>"}]
+}
