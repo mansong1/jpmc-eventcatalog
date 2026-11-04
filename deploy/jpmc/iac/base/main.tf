@@ -51,13 +51,13 @@ resource "aws_security_group" "alb" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = var.ingress_cidrs
+    cidr_blocks = var.preview_ingress_cidrs
   }
   ingress {
     from_port   = var.preview_port_min
     to_port     = var.preview_port_max
     protocol    = "tcp"
-    cidr_blocks = var.ingress_cidrs
+    cidr_blocks = var.preview_ingress_cidrs
   }
   egress {
     from_port   = 0

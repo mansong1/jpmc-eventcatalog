@@ -19,8 +19,17 @@ variable "subnet_ids" {
   default = ["subnet-7db33072", "subnet-35b30f7f", "subnet-e7bc4480"]
 }
 variable "ingress_cidrs" {
-  type    = list(string)
-  default = ["0.0.0.0/0"]
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+  description = "Who can reach the released site on port 80"
+}
+variable "preview_ingress_cidrs" {
+  type        = list(string)
+  description = "Who can reach unreleased builds: test listener 8080 and preview ports (corporate/VPN ranges, never 0.0.0.0/0)"
+  validation {
+    condition     = length(var.preview_ingress_cidrs) > 0 && !contains(var.preview_ingress_cidrs, "0.0.0.0/0")
+    error_message = "preview_ingress_cidrs must be a non-empty list of restricted CIDRs."
+  }
 }
 variable "preview_port_min" {
   type    = number
