@@ -1,0 +1,29 @@
+---
+id: request-preview
+name: Request Preview
+version: 1.0.0
+summary: |
+  Starts PR <n>'s preview: the PR trigger runs the saved pr_preview (built on Harness Cloud), and by hand the harness CLI or MCP server runs laptop_preview with inputs pr=<n> and who=<you> (built on the developer's Mac).
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness pipeline'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Sent by the GitHub PR trigger `pr_preview_github` (→ `pr_preview`), or by [[service|delivery-cli]] as `harness execute pipeline laptop_preview --input pr=<n> --input who=<you>`. Both are saved pipelines, so a failed stage can be retried (`harness execute execution:retry pr_preview/<exec> --retry-stages deploy`). Don't start `laptop_preview` while `pr_preview` has the same PR's preview open: they share its slot and ECS service.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

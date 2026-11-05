@@ -1,0 +1,43 @@
+---
+id: delivery-cli
+version: 1.0.0
+name: harness CLI + MCP server
+summary: |
+  Developer entry point: the harness CLI (or an assistant through the Harness MCP server) starts saved pipelines with inputs and input sets, approves, retries and runs one-off dynamic YAML.
+owners:
+  - delivery-platform
+sends:
+  - id: request-preview
+    version: 1.0.0
+    to:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
+  - id: start-release-candidate
+    version: 1.0.0
+    to:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
+  - id: promotion-requested
+    version: 1.0.0
+  - id: deploy-image
+    version: 1.0.0
+    to:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Nobody hand-writes a pipeline. The everyday path is a saved pipeline plus inputs: `harness execute pipeline deploy_ecs --input env=jpmc_prod --input image_tag=<tag>`, or `--input-set main --input who=<you>` for the laptop pipelines. From an assistant, the Harness MCP server does the same with `harness_execute(resource_type=pipeline, action=run, resource_id=<id>, inputs={...})`, which resolves the runtime inputs for you.
+
+The same CLI approves or rejects approval steps and retries stages. One-off YAML runs as a dynamic execution of the shell pipeline `ec_dynamic` (`harness execute pipeline:dynamic ec_dynamic -f pipelines/dynamic/smoke_envs.yaml`; CLI only, no MCP equivalent), and the executed YAML is stored on the run. Dynamic runs take no input sets or runtime inputs, so the values live in the reviewed file. On-run OPA policies evaluate that YAML like any saved pipeline.
+
+## Architecture diagram
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} />
+
+<Footer />

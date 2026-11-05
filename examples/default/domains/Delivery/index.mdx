@@ -1,0 +1,57 @@
+---
+id: delivery
+name: Delivery Platform
+version: 1.0.0
+summary: |
+  How a change to this catalog travels from a clone, through a governed PR preview, to an immutable release candidate promoted dev → staging → prod on Harness and AWS ECS.
+owners:
+  - delivery-platform
+services:
+  - id: delivery-cli
+    version: 1.0.0
+  - id: pr-preview
+    version: 1.0.0
+  - id: rc-build
+    version: 1.0.0
+  - id: promotion-gate
+    version: 1.0.0
+  - id: ecs-runtime
+    version: 1.0.0
+  - id: release-orchestration
+    version: 1.0.0
+  - id: rc-autofix-agents
+    version: 1.0.0
+systems:
+  - id: preview-system
+    version: 1.0.0
+  - id: release-system
+    version: 1.0.0
+flows:
+  - id: clone-to-governed-release
+    version: 1.0.0
+badges:
+  - content: Platform domain
+    backgroundColor: blue
+    textColor: blue
+    icon: RectangleGroupIcon
+---
+
+## Overview
+
+The **Delivery Platform** domain models the system that builds, previews, gates and deploys this EventCatalog site. Each service is a Harness pipeline (or pipeline stage), and each message is a hand-off between them: a trigger, an approval outcome, a policy decision or a deployment record.
+
+| Component | Responsibility |
+|-----------|----------------|
+| [[service\|delivery-cli]] | the `harness` CLI and MCP server start saved pipelines with inputs; one-off YAML runs dynamically |
+| [[service\|pr-preview]] | Functional build (Cloud or Mac), IaCM slot, ECS preview, 24h review |
+| [[service\|rc-build]] | Quality and STO gates, then one immutable `rc-<sha>` image |
+| [[service\|promotion-gate]] | Approval or change window → fresh evidence → OPA policy |
+| [[service\|ecs-runtime]] | dev rolling, staging blue/green, prod canary |
+| [[service\|release-orchestration]] | The same artifact through phases `jpmc_rc` → `jpmc_staging` → `jpmc_prod` |
+| [[service\|rc-autofix-agents]] | Triage → fixer → guardrails → GitHub PR (Cloud or Mac) |
+
+<NodeGraph />
+
+## End to end
+
+The [[flow|clone-to-governed-release]] flow walks one change from PR to prod, including the failure branch. The platform-level details that do not fit the service model (port map, AWS topology, policy inheritance) are in the [Delivery architecture](/docs/custom/delivery/01-delivery-architecture) page.

@@ -1,0 +1,23 @@
+---
+id: delivery.chained-stage
+name: Chained Pipeline Stage
+version: 1.0.0
+summary: |
+  A Pipeline stage that runs another saved pipeline, such as release_candidate's last stage calling rc_autofix when the run fails.
+owners:
+  - delivery-platform
+address: stage type Pipeline
+protocols:
+  - harness
+deliveryGuarantee: exactly-once
+---
+
+## Overview
+
+`release_candidate` ends with a chained `rc_autofix` stage (`when: pipelineStatus: Failure`). A failed gate reaches the [[service|rc-autofix-agents]] this way, with the failed execution ID as an input.
+
+<ChannelInformation />
+
+## Architecture diagram
+
+<NodeGraph />

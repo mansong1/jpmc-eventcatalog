@@ -1,0 +1,29 @@
+---
+id: start-release-candidate
+name: Start Release Candidate
+version: 1.0.0
+summary: |
+  Starts release_candidate (or the rc_build activity) with an input set, optionally scheduling a prod change window.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness pipeline'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Sent by [[service|delivery-cli]] (`harness execute pipeline release_candidate --input-set rc_main`) or by [[service|release-orchestration]] as its first activity.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

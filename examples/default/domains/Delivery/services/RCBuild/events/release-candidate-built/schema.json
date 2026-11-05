@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReleaseCandidateBuilt",
+  "type": "object",
+  "properties": {
+    "imageTag": {
+      "type": "string",
+      "pattern": "^rc-[0-9a-f]+$",
+      "description": "Immutable release-candidate tag, rc-<sha>"
+    },
+    "commitSha": {
+      "type": "string"
+    },
+    "gates": {
+      "type": "object",
+      "properties": {
+        "secrets": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "report-only"
+          ]
+        },
+        "sast": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "report-only"
+          ]
+        },
+        "sca": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "report-only"
+          ]
+        },
+        "image": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "report-only"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "imageTag",
+    "commitSha",
+    "gates"
+  ]
+}

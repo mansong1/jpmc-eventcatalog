@@ -1,0 +1,29 @@
+---
+id: preview-rejected
+name: Preview Rejected
+version: 1.0.0
+summary: |
+  A reviewer rejected the preview, or the 24h approval timed out; the ECS service and then the IaCM slot are torn down.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness approval'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|pr-preview]]. If teardown is interrupted, the hourly janitor catches it at expiry or as an orphan.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

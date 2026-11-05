@@ -1,0 +1,39 @@
+---
+id: release-system
+name: Release System
+version: 1.0.0
+summary: |
+  Saved pipelines release_candidate, rc_build, deploy_ecs and rc_autofix, plus the Release Orchestration process: one immutable rc-<sha> promoted dev → staging → prod behind policy gates.
+owners:
+  - delivery-platform
+services:
+  - id: rc-build
+  - id: promotion-gate
+  - id: release-orchestration
+  - id: rc-autofix-agents
+flows:
+  - id: clone-to-governed-release
+    version: 1.0.0
+actors:
+  - id: engineer
+    name: Engineer
+    label: merges, approves prod
+    direction: inbound
+badges:
+  - content: Harness · JPMC_Workshop
+    backgroundColor: purple
+    textColor: purple
+    icon: BoltIcon
+---
+
+## Overview
+
+A merge to `main` arrives on [[channel|delivery.github-webhooks]] and starts [[service|rc-build]]. [[service|release-orchestration]] and the [[service|delivery-cli]] start deploys through the [[channel|delivery.harness-pipeline-api]]. The [[service|promotion-gate]] decides each promotion. A failed gate reaches the [[service|rc-autofix-agents]] over the [[channel|delivery.chained-stage]]. The [[service|ecs-runtime]] on AWS sits outside the system.
+
+## Resource Diagram
+
+<NodeGraph />
+
+## Context Diagram
+
+<ContextDiagram />

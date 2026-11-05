@@ -1,0 +1,39 @@
+---
+id: promotion-gate
+version: 1.0.0
+name: Promotion Gate
+summary: |
+  Stage template jpmc_promotion: approval or scheduled change window, then fresh evidence from the previous environment, then an OPA Policy step.
+owners:
+  - delivery-platform
+receives:
+  - id: promotion-requested
+    version: 1.0.0
+  - id: deployed-to-environment
+    version: 1.0.0
+sends:
+  - id: promotion-approved
+    version: 1.0.0
+  - id: promotion-denied
+    version: 1.0.0
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Used for both `approve_staging` and `approve_prod`.
+
+1. **Approve.** A manual `HarnessApproval`, or the `prod_window` change window, which approves itself at the set time unless someone approves early or rejects. The default is `none`, so prod stays a manual click.
+2. **Fresh evidence.** *After* the approval, a step reads the previous environment's `/version.json` and computes the soak time from its `DEPLOYED_AT`.
+3. **Policy.** An OPA `Policy` step on set `jpmc_promotion_gate`. It denies when the tag isn't `rc-<sha>`, when the previous environment serves something else, or when soak is under `min_soak_seconds` (0 for staging, 180 for prod).
+
+Because the policy runs after the click, it judges what is running *now*. A stale approval cannot promote a redeployed environment.
+
+## Architecture diagram
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} />
+
+<Footer />

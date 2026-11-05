@@ -1,0 +1,23 @@
+---
+id: delivery.harness-pipeline-api
+name: Harness Pipeline API
+version: 1.0.0
+summary: |
+  The pipeline execute API behind `harness execute pipeline` and the MCP server's harness_execute: a saved pipeline plus inputs or an input set.
+owners:
+  - delivery-platform
+address: /pipeline/api/pipeline/execute/{pipeline}
+protocols:
+  - https
+deliveryGuarantee: at-most-once
+---
+
+## Overview
+
+Every human or assistant start goes through this API. The [[service|delivery-cli]] and [[service|release-orchestration]] activities run saved pipelines with inputs, so nothing is hand-written. On-run OPA policy sets evaluate each execution.
+
+<ChannelInformation />
+
+## Architecture diagram
+
+<NodeGraph />

@@ -1,0 +1,29 @@
+---
+id: promotion-approved
+name: Promotion Approved
+version: 1.0.0
+summary: |
+  The jpmc_promotion_gate policy passed on fresh evidence: immutable tag, previous environment serving it, minimum soak met.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'OPA policy'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|promotion-gate]]; [[service|ecs-runtime]] deploys the same tag to the next environment.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

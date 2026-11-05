@@ -1,0 +1,29 @@
+---
+id: release-candidate-built
+name: Release Candidate Built
+version: 1.0.0
+summary: |
+  The quality and STO gates passed and the image was pushed once as the immutable tag rc-<sha>.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness pipeline'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|rc-build]]. [[service|ecs-runtime]] deploys this tag to dev, and [[service|release-orchestration]] chains it as `IMAGE_TAG`.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

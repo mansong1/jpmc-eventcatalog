@@ -1,0 +1,29 @@
+---
+id: gate-failed
+name: Gate Failed
+version: 1.0.0
+summary: |
+  A stage of release_candidate failed (a quality or security gate, or a deploy verification); rc_autofix is chained with the failed execution id.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness pipeline'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|rc-build]] and [[service|ecs-runtime]] and consumed by [[service|rc-autofix-agents]]. A failed image gate example: `1 critical, 11 high` from AquaTrivy.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

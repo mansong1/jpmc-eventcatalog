@@ -1,0 +1,29 @@
+---
+id: merged-to-main
+name: Merged To Main
+version: 1.0.0
+summary: |
+  A push to main; trigger rc_on_merge starts release_candidate as a branch build of the pushed commit.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Source:GitHub webhook'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Trigger `rc_on_merge` builds the *branch* (`<+trigger.branch>`), not the SHA, so codebase expressions resolve. It pins `prod_window` to `none`, so a merge never schedules prod.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

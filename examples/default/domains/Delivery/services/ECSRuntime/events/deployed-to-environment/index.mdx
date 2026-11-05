@@ -1,0 +1,29 @@
+---
+id: deployed-to-environment
+name: Deployed To Environment
+version: 1.0.0
+summary: |
+  An environment is verified serving a tag; DEPLOYED_AT is recorded as evidence for the next promotion gate.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Harness pipeline'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|ecs-runtime]] after its Http verification of `/version.json`. [[service|promotion-gate]] reads this evidence, and [[service|release-orchestration]] chains it as `DEPLOYED_TAG`.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />

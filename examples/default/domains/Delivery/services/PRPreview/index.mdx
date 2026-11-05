@@ -1,0 +1,48 @@
+---
+id: pr-preview
+version: 1.0.0
+name: PR Preview
+summary: |
+  Builds a PR, provisions an ephemeral IaCM slot, deploys an ECS preview service and holds it behind a 24h accept/reject approval.
+owners:
+  - delivery-platform
+receives:
+  - id: pull-request-opened
+    version: 1.0.0
+    from:
+      - id: delivery.github-webhooks
+        version: 1.0.0
+  - id: request-preview
+    version: 1.0.0
+    from:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
+sends:
+  - id: preview-deployed
+    version: 1.0.0
+  - id: preview-accepted
+    version: 1.0.0
+  - id: preview-rejected
+    version: 1.0.0
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Started by a GitHub PR (trigger `pr_preview_github` → saved pipeline `pr_preview`), or by [[command|request-preview]] from the CLI (saved pipeline `laptop_preview`).
+
+1. **Functional build.** `pr_preview` builds on Harness Cloud. `laptop_preview` builds on the developer's own Mac through Delegate 3.0 (`jpmc-mac-<who>`), in parallel with the slot. The Mac uploads `dist/` to a single short-lived signed URL. Cloud then re-verifies the SHA-256 and page count and packages a static nginx image, so no credential sits on the laptop.
+2. **Slot.** IaCM (OpenTofu) workspace `jpmc_pv_pr_<n>` gives the PR its own ALB listener port and target group.
+3. **Deploy.** ECS service `jpmc-eventcatalog-pr-<n>`, then [[event|preview-deployed]] with the URL.
+4. **Review.** A 24h approval. Accept keeps the preview until `expires_at`. Reject or timeout tears down the service, then the slot.
+
+The hourly `cleanup_generated` janitor removes expired pipelines, preview workspaces and orphan ECS services.
+
+## Architecture diagram
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} />
+
+<Footer />

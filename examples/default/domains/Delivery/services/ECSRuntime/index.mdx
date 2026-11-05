@@ -1,0 +1,49 @@
+---
+id: ecs-runtime
+version: 1.0.0
+name: ECS Runtime
+summary: |
+  Deploys the image to ECS Fargate with one strategy per environment: dev rolling, staging blue/green, prod canary.
+owners:
+  - delivery-platform
+receives:
+  - id: release-candidate-built
+    version: 1.0.0
+  - id: promotion-approved
+    version: 1.0.0
+  - id: deploy-image
+    version: 1.0.0
+    from:
+      - id: delivery.harness-pipeline-api
+        version: 1.0.0
+sends:
+  - id: deployed-to-environment
+    version: 1.0.0
+  - id: gate-failed
+    version: 1.0.0
+    to:
+      - id: delivery.chained-stage
+        version: 1.0.0
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+| Environment | Strategy | Port | Flow |
+|---|---|---|---|
+| dev | rolling (`deploy_ecs` stage `dev_rolling`) | 8198 | rolling update |
+| staging | blue/green (stage `staging_bluegreen`) | 8197 test → 8199 live | new service on the idle TG behind :8197, verify, swap target groups, verify :8199, downsize the old service after 300 s |
+| prod | canary (stage `prod_canary`) | 80 | one-task canary in the live TG, verify until a request hits it, delete the canary, roll the primary, verify |
+
+One pipeline, `deploy_ecs`, holds all three: its `env` input decides which stage runs, and each stage has a fixed environment, so an environment can't get the wrong strategy.
+
+Rollbacks: staging uses `EcsBlueGreenRollback` (a listener swap back). Prod uses `EcsCanaryDelete` + `EcsRollingRollback` under `spec.execution.rollbackSteps`, which policy `jpmc_block_prod_without_rollback` enforces. Each deploy records evidence (`/version.json`, `DEPLOYED_AT`) for the next [[service|promotion-gate]].
+
+## Architecture diagram
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} />
+
+<Footer />

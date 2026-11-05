@@ -1,0 +1,126 @@
+---
+title: Delivery architecture
+summary: Where to find the delivery platform model, plus the runtime topology, port map and policy inheritance that sit outside it.
+badges:
+  - content: Delivery
+    backgroundColor: blue
+    textColor: blue
+---
+
+The delivery platform for this catalog is modelled in the catalog itself:
+
+- [[domain|delivery]] is the domain. Its services are the Harness pipelines, and its messages are the hand-offs between them.
+- [[flow|clone-to-governed-release]] walks one change from PR → preview → merge → `rc-<sha>` → dev → staging → prod, including the failure branch to the autofix agents.
+- Entry points: [[service|delivery-cli]], [[service|pr-preview]], [[service|rc-build]], [[service|promotion-gate]], [[service|ecs-runtime]], [[service|release-orchestration]] and [[service|rc-autofix-agents]].
+
+This page covers only what the model doesn't show.
+
+## Delivery map
+
+The saved Harness pipelines and the messages between them, drawn from the catalog model. Pink is a pipeline
+(service), orange an event, blue a command, grey a channel. GitHub webhooks and the pipeline API (harness CLI ·
+MCP server) route into each system.
+
+### PR preview
+
+<NodeGraph id="preview-system" version="1.0.0" type="system" maxHeight={30} mode="simple" />
+
+### Release
+
+A failed gate reaches the agents as a chained stage; ECS sits outside the system on AWS.
+
+<NodeGraph id="release-system" version="1.0.0" type="system" maxHeight={40} mode="simple" />
+
+## Runtime topology
+
+Where each piece runs: the engineer's Mac, Harness, and AWS.
+
+```mermaid
+flowchart LR
+  subgraph laptop["Engineer's Mac"]
+    cli["harness CLI · MCP server<br/>saved pipelines + inputs"]
+    d3["Delegate 3.0<br/>jpmc-mac-&lt;who&gt;"]
+  end
+  repo["GitHub<br/>jpmc-eventcatalog"]
+  subgraph harness["Harness · JPMC_Workshop · OPA on every run and plan"]
+    lap["laptop_preview · laptop_build<br/>laptop_triage · laptop_autofix<br/>jpmc-mac-&lt;who&gt;"]
+    pv["pr_preview<br/>URL · 24h accept / reject"]
+    rc["release_candidate<br/>quality + STO gates · promotions"]
+    agents["rc_autofix<br/>triage · fixer agents"]
+  end
+  subgraph aws["AWS us-east-1 · eks delegate (IRSA) · IaCM"]
+    ecr["ECR<br/>rc-&lt;sha&gt; · pr-&lt;n&gt;"]
+    ecs["ECS Fargate · deploy_ecs<br/>dev rolling · staging blue/green<br/>prod canary · pr previews"]
+    alb["ALB<br/>one port per environment"]
+  end
+
+  cli -->|run with inputs| lap
+  lap -->|functional build · agents| d3
+  repo -->|PR webhook| pv
+  repo -->|merge webhook| rc
+  rc -->|on failure · chained stage| agents
+  pv -->|image| ecr
+  rc -->|rc-&lt;sha&gt;| ecr
+  ecr --> ecs
+  alb --> ecs
+  pv -.->|harness/preview status| repo
+  agents & lap -.->|autofix PR| repo
+
+  classDef pipeline fill:#2a1424,stroke:#ec4899,stroke-width:2px,color:#fbcfe8
+  classDef entry fill:#111c33,stroke:#3b82f6,stroke-width:2px,color:#bfdbfe
+  classDef agent fill:#1f1633,stroke:#a855f7,stroke-width:2px,color:#e9d5ff
+  classDef ext fill:#1f2328,stroke:#9ca3af,stroke-width:2px,color:#e5e7eb
+  classDef cloud fill:#2b1d0e,stroke:#f59e0b,stroke-width:2px,color:#fde68a
+  class pv,rc,lap pipeline
+  class cli,d3 entry
+  class agents agent
+  class repo ext
+  class ecr,ecs,alb cloud
+  style laptop fill:#0b1220,stroke:#3b82f6,stroke-dasharray:4 3,color:#93c5fd
+  style harness fill:#140f22,stroke:#a855f7,stroke-width:2px,color:#d8b4fe
+  style aws fill:#17110a,stroke:#f59e0b,stroke-dasharray:4 3,color:#fcd34d
+  linkStyle 0,1 stroke:#3b82f6,stroke-width:2px
+  linkStyle 2,3 stroke:#9ca3af,stroke-width:2px
+  linkStyle 4 stroke:#a855f7,stroke-width:2px
+  linkStyle 5,6,7,8 stroke:#f59e0b,stroke-width:2px
+  linkStyle 9,10,11 stroke:#ec4899,stroke-width:2px
+```
+
+## AWS runtime topology
+
+Everything runs behind one shared Application Load Balancer, `jpmc-eventcatalog`. Each environment and each PR preview gets its own listener port and target group, so a new preview needs no DNS change. Workloads are static nginx images on ECS Fargate, pulled from ECR repository `jpmc-eventcatalog` (immutable tags, scan on push, `pr-*` images expire after 7 days).
+
+| Port | Serves | Access |
+|---|---|---|
+| 80 | prod (canary) | open |
+| 8199 | staging, live (blue/green) | restricted CIDRs |
+| 8197 | staging blue/green test listener | restricted CIDRs |
+| 8198 | dev (rolling) | restricted CIDRs |
+| 8100–8196 | per-PR previews (`pr-<n>` → `8100 + n mod 97`) | restricted CIDRs |
+
+Ports for unreleased builds accept only `preview_ingress_cidrs`, which holds the corporate egress range plus the `eks` delegate's NAT address used by Http verification. The IaC rejects `0.0.0.0/0` for that list. Tasks accept port 80 from the ALB security group only.
+
+| IaCM workspace | Contains |
+|---|---|
+| `jpmc_base` | ALB, security groups, ECR, log group, prod target groups |
+| `jpmc_slot_staging` | Staging port and target group, plus the `:8197` test listener and green TG for blue/green |
+| `jpmc_pv_pr_<n>` | One preview port and target group per PR, tagged `layer=preview` and `expires_at` |
+
+CD owns listener routing: IaC leaves listener default actions to the pipelines (`ignore_changes`). AWS access is keyless. CI and IaCM use an OIDC connector scoped to the project, and CD uses IRSA on the `eks` delegate.
+
+## Policy inheritance
+
+OPA policy sets are inherited, so every project run is evaluated against account, org and project sets.
+
+| Scope | Policy | When | Severity |
+|---|---|---|---|
+| account | `jpmc_warn_missing_owner_tag` | on run | warn |
+| org | `jpmc_block_mutable_tags` (`latest`, `main`, `dev`) | on run | block |
+| project | `jpmc_block_prod_without_rollback` | on save + on run | block |
+| project | `jpmc_warn_generated_shellscript` | on run | warn |
+| project | `jpmc_agent_rules` (Agent steps pinned, `check_patch` after every fixer, no Agent in a Deployment stage) | on save | block |
+| project | `jpmc_plan_block_shared_destroy` | after Terraform plan | block |
+| project | `jpmc_plan_warn_public_ingress` | after Terraform plan | warn |
+| project | `jpmc_promotion_gate` | Policy step in [[service\|promotion-gate]] | block |
+
+One-off dynamic YAML (`harness execute pipeline:dynamic ec_dynamic -f <file>`) is evaluated by the same on-run sets as saved pipelines.

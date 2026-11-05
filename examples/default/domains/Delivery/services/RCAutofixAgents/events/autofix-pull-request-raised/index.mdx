@@ -1,0 +1,29 @@
+---
+id: autofix-pull-request-raised
+name: Autofix Pull Request Raised
+version: 1.0.0
+summary: |
+  The fixer's patch passed the guardrails and the same gate re-run, and a GitHub PR was opened on autofix/rc-<seq>.
+owners:
+  - delivery-platform
+schemaPath: schema.json
+badges:
+  - content: 'Source:GitHub'
+    backgroundColor: blue
+    textColor: blue
+    icon: BoltIcon
+---
+
+import Footer from '@catalog/components/footer.astro';
+
+## Overview
+
+Published by [[service|rc-autofix-agents]]. The PR body is the agent's `fix.md` plus a verification section written by the pipeline, not by the agent.
+
+<SchemaViewer file="schema.json" title="JSON Schema" maxHeight="500" />
+
+## Architecture diagram
+
+<NodeGraph />
+
+<Footer />
