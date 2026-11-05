@@ -43,9 +43,9 @@ flowchart LR
   end
   repo["GitHub<br/>jpmc-eventcatalog"]
   subgraph harness["Harness · JPMC_Workshop · OPA on every run and plan"]
-    lap["laptop_build · laptop_triage<br/>jpmc-mac-&lt;who&gt;"]
+    lap["laptop_build · laptop_triage<br/>laptop_autofix · jpmc-mac-&lt;who&gt;"]
     pv["pr_preview<br/>URL · 24h accept / reject"]
-    rc["release_candidate<br/>STO gates · promotions"]
+    rc["release_candidate<br/>quality + STO gates · promotions"]
     agents["rc_autofix<br/>triage · fixer agents"]
   end
   subgraph aws["AWS us-east-1 · eks delegate (IRSA) · IaCM"]
@@ -55,7 +55,7 @@ flowchart LR
   end
 
   cli -->|run with inputs| lap
-  lap -->|functional build · triage agent| d3
+  lap -->|functional build · agents| d3
   repo -->|PR webhook| pv
   repo -->|merge webhook| rc
   rc -->|on failure · chained stage| agents
@@ -64,7 +64,7 @@ flowchart LR
   ecr --> ecs
   alb --> ecs
   pv -.->|harness/preview status| repo
-  agents -.->|autofix PR| repo
+  agents & lap -.->|autofix PR| repo
 
   classDef pipeline fill:#2a1424,stroke:#ec4899,stroke-width:2px,color:#fbcfe8
   classDef entry fill:#111c33,stroke:#3b82f6,stroke-width:2px,color:#bfdbfe
@@ -83,7 +83,7 @@ flowchart LR
   linkStyle 2,3 stroke:#9ca3af,stroke-width:2px
   linkStyle 4 stroke:#a855f7,stroke-width:2px
   linkStyle 5,6,7,8 stroke:#f59e0b,stroke-width:2px
-  linkStyle 9,10 stroke:#ec4899,stroke-width:2px
+  linkStyle 9,10,11 stroke:#ec4899,stroke-width:2px
 ```
 
 ## AWS runtime topology
@@ -118,6 +118,7 @@ OPA policy sets are inherited, so every project run is evaluated against account
 | org | `jpmc_block_mutable_tags` (`latest`, `main`, `dev`) | on run | block |
 | project | `jpmc_block_prod_without_rollback` | on save + on run | block |
 | project | `jpmc_warn_generated_shellscript` | on run | warn |
+| project | `jpmc_agent_rules` (Agent steps pinned, `check_patch` after every fixer, no Agent in a Deployment stage) | on save | block |
 | project | `jpmc_plan_block_shared_destroy` | after Terraform plan | block |
 | project | `jpmc_plan_warn_public_ingress` | after Terraform plan | warn |
 | project | `jpmc_promotion_gate` | Policy step in [[service\|promotion-gate]] | block |

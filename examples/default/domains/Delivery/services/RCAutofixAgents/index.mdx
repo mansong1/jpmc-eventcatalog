@@ -28,10 +28,20 @@ Chained as the last stage of `release_candidate` (`when: pipelineStatus: Failure
 1. **Triage agent** (`jpmc_rc_triage`) reads the diagnosis and failing log over MCP and picks **fix / retry / human**. Secrets findings, policy denials and anything unclear always go to `human`.
 2. **route** (bash) parses the decision and forces anything unknown to `human`.
 3. **Fixer agent** (`jpmc_rc_fixer`) edits the workspace only, fixing the cause and never the gate.
-4. **check patch** rejects protected paths (`.gitleaks.toml`, `.trivyignore*`, `.harness/`, IaC, ECS, tests) and patches over 3 files.
-5. **Rebuild + re-run the same gate**, then **raise pr** on branch `autofix/rc-<seq>`.
+4. **check patch** rejects protected paths (`.gitleaks.toml`, `.trivyignore*`, `.semgrepignore`, `.harness/`, `.github/`, IaC, ECS,
+   tests and specs, `vitest.config.*`, `.eventcatalogrc.js`, `examples/default/fitness/`) and patches over 3 files. The fixer
+   gets the same list as `protectedGlobs`.
+5. **Re-run the quality gate** (catalog lint, core unit tests) on the patched tree, so a fix for any gate can't break them.
+6. **Rebuild + re-run the same image gate**, then **raise pr** on branch `autofix/rc-<seq>`.
 
 The agents hold no write credentials. They run as a read-only service account, and the GitHub token exists only in the deterministic `raise pr` step.
+
+`laptop_autofix` runs the same loop, with the same agents and guardrails, on the developer's Mac (Delegate 3.0
+`jpmc-mac-<who>`). There the image gate is Trivy through OrbStack instead of an STO step.
+
+OPA policy `jpmc_agent_rules` blocks saving a pipeline that breaks the agent rules: every Agent step pinned to `@x.y.z`,
+a `check_patch` step after every fixer, no Agent in a Deployment stage, and the stage `HARNESS_TOKEN` always the
+read-only `jpmc_agent_token`.
 
 ## Architecture diagram
 

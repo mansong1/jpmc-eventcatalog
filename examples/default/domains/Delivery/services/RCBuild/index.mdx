@@ -3,7 +3,7 @@ id: rc-build
 version: 1.0.0
 name: RC Build
 summary: |
-  Runs the STO security gates and pushes one immutable rc-<sha> image only after every gate passes.
+  Runs the quality gate and the STO security gates, and pushes one immutable rc-<sha> image only after every gate passes.
 owners:
   - delivery-platform
 receives:
@@ -37,8 +37,12 @@ The first stage of `release_candidate` (also generated as the standalone `rc_bui
 |---|---|---|
 | secrets | Gitleaks (repository) | medium (reviewed allowlist in `.gitleaks.toml`) |
 | SAST | Semgrep (repository) | critical |
+| quality | catalog lint, core unit tests, fitness functions (`node:24`) | a lint error or a failing unit test. Fitness is report-only |
 | SCA | OsvScanner (repository) | report-only |
 | image | AquaTrivy on the locally built image, before push | critical |
+
+The quality gate runs on `git archive` of the commit in a container, so `node_modules` never reaches the workspace the
+scanners and the image build read. Fitness functions only report until main passes them (2 of 12 fail today).
 
 Only after all gates pass is the image pushed as `rc-<sha>`. Every later deployment reads that one tag, and nothing is rebuilt.
 
