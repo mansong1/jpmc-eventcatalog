@@ -1,4 +1,4 @@
-# Runtime-only image for a catalog built somewhere else (the developer's Mac: `ec preview --laptop`).
+# Runtime-only image for a catalog built somewhere else (the developer's Mac, in the `laptop_preview` pipeline).
 # Same runtime stage as ./Dockerfile; the context is a bundle dir holding dist/ and nginx.conf, not the repo:
 #   docker build -f Dockerfile.static --build-arg BUILD_LABEL=<label> <bundle dir>
 FROM nginx:1.29-alpine

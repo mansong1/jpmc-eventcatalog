@@ -3,7 +3,7 @@ id: preview-system
 name: PR Preview System
 version: 1.0.0
 summary: |
-  Saved pipeline pr_preview: one IaCM slot and ECS service per PR, a harness/preview status with the URL, and a 24h accept or reject before teardown.
+  Saved pipelines pr_preview (Cloud build, from the PR trigger) and laptop_preview (Mac build, from the CLI): one IaCM slot and ECS service per PR, a harness/preview status with the URL, and a 24h accept or reject before teardown.
 owners:
   - delivery-platform
 services:
@@ -25,7 +25,7 @@ badges:
 
 ## Overview
 
-A PR opened against `main` arrives on [[channel|delivery.github-webhooks]] and starts [[service|pr-preview]]. A re-run comes from the [[service|delivery-cli]] through the [[channel|delivery.harness-pipeline-api]]. The preview is accepted or rejected within 24h, then torn down.
+A PR opened against `main` arrives on [[channel|delivery.github-webhooks]] and starts [[service|pr-preview]]. A preview built on the developer's Mac (`laptop_preview`) comes from the [[service|delivery-cli]] through the [[channel|delivery.harness-pipeline-api]]. The preview is accepted or rejected within 24h, then torn down.
 
 ## Resource Diagram
 
