@@ -39,3 +39,14 @@ variable "task_execution_role_arn" {
   default     = "arn:aws:iam::759984737373:role/cicd-demo-ecs-task-execution"
   description = "Existing ECS task execution role (ECR pull + logs). Referenced, not created, so this stack adds no IAM."
 }
+
+variable "ttl_hours" {
+  type        = number
+  default     = -1
+  description = "Hours until this stack counts as expired. -1 = never expires: resources carry ttl=-1 and no expires_at tag. Matches the workshop preview convention in ../preview (created_at + ttl_hours -> expires_at), where the Janitor only reaps layer=preview IaCM workspaces and pr-* ECS services; this stack is neither."
+}
+variable "created_at" {
+  type        = string
+  default     = ""
+  description = "RFC3339 creation time. Required only when ttl_hours >= 0."
+}

@@ -13,7 +13,10 @@ terraform {
 provider "aws" {
   region = var.region
   default_tags {
-    tags = { app = "jpmc-eventcatalog", managed_by = "harness-iacm", owner = var.owner, stack = "ecs-app" }
+    tags = merge(
+      { app = "jpmc-eventcatalog", managed_by = "harness-iacm", owner = var.owner, stack = "ecs-app", ttl = tostring(var.ttl_hours) },
+      var.ttl_hours >= 0 ? { expires_at = timeadd(var.created_at, "${var.ttl_hours}h") } : {}
+    )
   }
 }
 
